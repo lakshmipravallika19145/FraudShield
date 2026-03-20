@@ -8,7 +8,7 @@ While building FraudShield, we uncovered a striking reality: **GPS coordinates c
 
 That hit us hard. The workers who are genuinely stranded get caught in blanket crackdowns. The actual fraudsters keep exploiting the system. Nobody wins except the attackers.
 
-We asked ourselves: what if you could build a system that was *smarter* than the attacker — one that doesn't just check coordinates, but reconstructs the full physical truth of whether someone was really where they claimed to be?
+We asked ourselves: what if you could build a system that was smarter than the attacker — one that doesn't just check coordinates, but reconstructs the full physical truth of whether someone was really where they claimed to be?
 
 That question became **FraudShield**.
 
@@ -26,7 +26,7 @@ Fake GPS apps produce geometrically perfect but physically impossible trajectori
 
 $$MAS = \alpha \cdot S_{physics} + \beta \cdot S_{sensor} + \gamma \cdot S_{entropy}$$
 
-where ( \alpha, \beta, \gamma \\) are learned weights and each sub-score penalizes specific spoofing signatures. A real moving vehicle vibrates. A fake one doesn't.
+where ( alpha, beta, gamma ) are learned weights and each sub-score penalizes specific spoofing signatures. A real moving vehicle vibrates. A fake one doesn't.
 
 **Layer 3 — AI Anomaly Detection**
 Two unsupervised models run in parallel on an 8-dimensional behavioral feature vector:
@@ -36,7 +36,7 @@ Two unsupervised models run in parallel on an 8-dimensional behavioral feature v
 Both models run at inference in **< 20ms**.
 
 **Layer 4 — Graph Neural Network Fraud Ring Detection**
-The entire platform is modeled as a heterogeneous graph — accounts, devices, IPs, and locations as nodes; shared resources as edges. A **GraphSAGE-based GNN** classifies nodes by neighborhood context. An account sitting two hops from a known fraud cluster gets flagged *before* it strikes — purely based on graph proximity.
+The entire platform is modeled as a heterogeneous graph — accounts, devices, IPs, and locations as nodes; shared resources as edges. A **GraphSAGE-based GNN** classifies nodes by neighborhood context. An account sitting two hops from a known fraud cluster gets flagged before it strikes — purely based on graph proximity.
 
 **Layer 5 — Device Integrity Checks**
 We detect the tools attackers use: emulators, rooted/jailbroken devices, mock location providers, and debug-mode flags via Android SafetyNet and iOS DeviceCheck.
@@ -82,7 +82,7 @@ We split across four areas: ML pipeline, graph engine, backend API, and frontend
 
 **GraphSAGE on a dynamic, mutating graph.** Fraud rings evolve — accounts get banned, new ones appear. Full retraining on every graph change wasn't feasible. We implemented incremental neighborhood sampling so node embeddings update without retraining from scratch.
 
-**Cross-platform device integrity.** Android SafetyNet and iOS DeviceCheck have completely different APIs, response formats, and failure modes. Abstracting them into a single unified `DeviceIntegrityScore` that the risk engine could consume took more engineering than expected.
+**Cross-platform device integrity.** Android SafetyNet and iOS DeviceCheck have completely different APIs, response formats, and failure modes. Abstracting them into a single unified 'Device Integrity Score' that the risk engine could consume took more engineering than expected.
 
 ---
 
@@ -103,7 +103,7 @@ We split across four areas: ML pipeline, graph engine, backend API, and frontend
 
 **Unsupervised ML is more practical than supervised ML for fraud in cold-start scenarios.** You rarely have clean labeled fraud data when launching. Anomaly detection on learned normal behavior is far more deployable from day one.
 
-**Defense-in-depth is the only real strategy.** Every individual layer we built can be bypassed by a sophisticated attacker. All seven together create a system where the *cost of attack exceeds the expected payout* — which is the actual security goal.
+**Defense-in-depth is the only real strategy.** Every individual layer we built can be bypassed by a sophisticated attacker. All seven together create a system where the cost of attack exceeds the expected payout — which is the actual security goal.
 
 **Protecting honest workers is a technical constraint, not an afterthought.** False positives in fraud systems have real human consequences. Designing the reputation buffer and appeal pathway early forced us to build more careful score calibration throughout every layer.
 
