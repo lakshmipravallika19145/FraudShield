@@ -109,11 +109,11 @@ This happens. A real delivery occurs, the customer receives their package, and t
 
 | Situation | What happens |
 |---|---|
-| Customer uploads receipt photo | ✅ Confirmed immediately |
-| Customer taps "Yes, I received it" | ✅ Confirmed |
-| No response + driver has clean history | ✅ Auto-approved after 10 minutes |
-| No response + driver is new or flagged | 🔄 Held for manual review |
-| Customer reports not received | 🚫 Escalated immediately |
+| Customer uploads receipt photo | Confirmed immediately |
+| Customer taps "Yes, I received it" | Confirmed |
+| No response + driver has clean history | Auto-approved after 10 minutes |
+| No response + driver is new or flagged | Held for manual review |
+| Customer reports not received | Escalated immediately |
 
 ---
 
@@ -126,11 +126,11 @@ Even if a driver perfectly fakes their GPS, IP address, and movement — they st
 
 | What the fraudster tries | Can they fake it? |
 |---|---|
-| Spoof GPS to look like they're at the address | ✅ Possible |
-| Fake IP address and WiFi signals | ⚠️ Very difficult |
-| Fake phone movement | ⚠️ Very difficult |
-| Complete the QR scan without being there | ❌ Impossible |
-| Get the customer to upload a receipt photo without receiving anything | ❌ Impossible |
+| Spoof GPS to look like they're at the address | Possible |
+| Fake IP address and WiFi signals |  Very difficult |
+| Fake phone movement |  Very difficult |
+| Complete the QR scan without being there | Impossible |
+| Get the customer to upload a receipt photo without receiving anything | Impossible |
 
 Location fraud gets them past the first set of checks. It gets them nowhere near completing the delivery.
 
@@ -139,26 +139,6 @@ Location fraud gets them past the first set of checks. It gets them nowhere near
 ### The risk score
 
 Every check adds or subtracts points from a fraud risk score for that delivery:
-
-| What we found | Points |
-|---|---|
-| GPS and IP location don't match | +30 |
-| Phone shows no real movement | +25 |
-| Behavior looks unusual for this account | +20 |
-| Account connected to a known fraud group | +35 |
-| Tampered or fake device detected | +25 |
-| QR scan not completed | +40 |
-| Driver left the address in under 30 seconds | +20 |
-| Customer receipt photo not uploaded | +30 |
-| Customer reported non-delivery | +25 |
-| Driver has a strong, clean history | −20 |
-
-| Final score | Decision |
-|---|---|
-| 0 – 30 | Payout approved automatically |
-| 31 – 79 | Payout held — driver asked to resolve the missing step |
-| 80 – 139 | Sent to a human reviewer |
-| 140 and above | Payout blocked, account flagged |
 
 A single signal firing never hard-blocks anyone. Multiple signals firing together escalate the decision step by step. Only when most signals fire at once — meaning deliberate, coordinated fraud — does the payout get blocked outright.
 
