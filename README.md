@@ -2,219 +2,230 @@
 
 ## Inspiration
 
-We started thinking about a simple question: **how do gig platforms know a delivery actually happened?**
+We started with a simple question: **how does a delivery platform actually know a delivery happened?**
 
-Most platforms trust GPS. If the app shows the driver reached the address, the delivery is marked complete and the payout goes through. That sounds reasonable — until you realize GPS can be faked by anyone using a free app downloaded in minutes.
+Most platforms just trust GPS. If the app shows the driver reached the address, the payout goes through. Simple enough — until you realize GPS can be faked in under a minute using a free app.
 
-But the problem goes even deeper. What about a driver who genuinely travels to the address, stands outside for 20 seconds, marks the order as delivered, and leaves — without ever knocking on the door or handing over the package? The GPS looks perfect. The route looks real. The system has no idea.
+But then we found a bigger problem. What about a driver who actually travels to the address, scans the QR code to confirm arrival, tells the customer "we'll be back in 10 minutes" — and then just leaves? GPS is real. Route is real. Scan is done. Package never delivered.
 
-We kept finding more cracks like this. Fake accounts sharing the same phone. Drivers marking deliveries complete from a parking lot two streets away. Coordinated groups filing dozens of fake "stranded" requests at the same time.
+And then we found another hole. What if we sent an OTP to the customer instead? A fraudulent driver could just call the customer, pretend to be support staff, say "please share the OTP and your order will arrive shortly" — and the trusting customer reads it out. OTP confirmed. Delivery marked complete. Package never handed over.
 
-And even when we added OTP verification, we realized it has a social engineering hole: a fraudulent driver can simply call the customer, pretend to be support, say *"tell me the OTP and we'll be there in 5 minutes"* — and the customer, trusting them, reads it out. OTP confirmed. Delivery marked complete. Package never handed over.
+Every time we thought we had it solved, a new real scenario broke it.
 
-So we rethought the entire delivery confirmation system from scratch.
-
-That became **FraudShield**.
+So we kept going until every hole was closed. That became **FraudShield**.
 
 ---
 
 ## What it does
 
-FraudShield sits between a delivery event and a payout. Every time a driver marks an order complete, FraudShield verifies it across multiple layers before any money moves.
+FraudShield checks every delivery before a payout is approved. It catches two types of fraud:
 
-There are two completely different types of fraud we solve:
-
----
-
-### Fraud Type 1 — Fake Location (Driver never went there)
-
-The driver uses a fake GPS app to pretend they're somewhere they're not. They never left home.
-
-**How we catch it:**
-
-**Cross-checking multiple signals**
-GPS is just one signal. We also look at the IP address location, nearby WiFi networks, and the phone's motion sensors. If GPS says the driver is in one city but the IP address points to another city and the phone hasn't moved at all — something is wrong. All signals need to match.
-
-**Checking if the movement makes physical sense**
-Real people move in messy, imperfect ways. Fake GPS apps move in perfectly straight lines at constant speeds. We check: Did the phone vibrate like a vehicle in motion? Did the route have normal turns and stops? Did the speed stay humanly possible? A driver who "teleported" 40 km in 10 seconds fails this check immediately.
-
-**Spotting unusual patterns with AI**
-We track each account's normal behavior over time — how often they request payouts, how active their sensors are, how their GPS signal varies. When something suddenly looks different from their usual pattern, the system flags it automatically.
-
-**Finding fraud groups**
-If ten different driver accounts all share the same phone or log in from the same internet connection, they're linked. When one gets flagged, the whole group gets a closer look — even the ones that haven't done anything suspicious yet.
-
-**Checking if the device is tampered**
-We detect if the phone is running fake GPS software, is a virtual emulator pretending to be a real phone, or has been modified to bypass security checks.
+- **Type 1** — Driver fakes their location and never goes to the address at all
+- **Type 2** — Driver goes to the address but never hands over the package
 
 ---
 
-### Fraud Type 2 — Ghost Delivery (Driver went there but didn't deliver)
+### Catching Type 1 — Driver fakes their location
 
-The driver physically travels to the address. GPS looks perfect. Route looks real. But they never handed over the package.
+When a driver claims to be at a delivery address, we run three quick checks:
 
-This is the harder problem — and the one most systems miss completely.
+**Do all location signals agree?**
+We don't just look at GPS. We also check the IP address and nearby WiFi networks. If GPS says the driver is at the delivery address but their internet connection places them in a completely different area — that's a red flag. A real driver at a real location will have all three signals roughly matching.
 
-We also discovered that the most common fix — OTP verification — has a critical flaw:
+**Does the movement look real?**
+Fake GPS apps move in perfectly straight lines at perfectly constant speeds. Real people slow down at traffic lights, take imperfect routes, and their phone vibrates while in a moving vehicle. If the movement looks too perfect, or the phone shows no vibration at all during claimed travel, we flag it.
 
-> A fraudulent driver can call the customer, pretend to be a support agent, say *"please share the OTP and your order will be delivered in 5 minutes"* — and the customer believes them and reads it out. The OTP gets entered. The delivery is marked complete. The package is never handed over.
+**Is the device legitimate?**
+We check if the phone is running a fake GPS app, is a virtual device pretending to be a real phone, or has been tampered with to bypass security. These are the tools fraudsters need — detecting them early raises a warning before anything else happens.
 
-**OTP can be socially engineered. So we don't use it.**
-
-Instead, FraudShield uses three tamper-proof methods:
-
----
-
-**✅ Fix 1 — QR Code Scanner (replaces OTP)**
-
-Instead of sending a code the customer can read out loud, we generate a unique QR code that lives only inside the customer's app.
-
-- When the driver arrives, they open their scanner in the delivery app
-- They physically scan the QR code shown on the customer's phone screen
-- The scan only works if both phones are within 1 meter of each other (proximity check)
-- The QR code expires in 60 seconds and cannot be reused
-
-This requires **real, in-person interaction**. There is no code to read out over the phone. The driver must be physically next to the customer and scan their screen. This cannot be faked remotely.
+That's it. Three checks. Simple, fast, and effective for catching drivers who never left home.
 
 ---
 
-**✅ Fix 2 — Customer Uploads a Photo to Confirm Receipt**
+### Catching Type 2 — Driver goes there but doesn't deliver
 
-After the driver hands over the package, the **customer** — not the driver — must open the platform's website or app and upload a photo of the package they just received.
+This is the harder problem. The driver is genuinely at the location. All location signals are clean. The fraud happens in the last few meters.
 
-- The photo must be taken live (camera roll uploads are blocked)
-- It is automatically tagged with the time and GPS location at the moment of capture
-- The customer's location at photo time must match the delivery address
-- The delivery is only marked complete after this photo is submitted
-
-This flips the proof of delivery from the driver's side to the customer's side. A fraudulent driver cannot fake a photo that the customer has to take on their own device, at their own location, in real time.
+We solved this with a two-step confirmation that **both the driver and the customer must complete** — and neither step alone is enough.
 
 ---
 
-**✅ Fix 3 — Dwell Time Check (how long the driver stayed)**
+**Step 1 — Driver scans the customer's QR code**
 
-Even with the scanner and photo, we check how long the driver was physically near the delivery address. A real handoff takes time.
+Every delivery has a unique QR code that lives inside the customer's app. When the driver arrives:
 
-| Time spent within 50m of address | What happens |
+- The driver opens the scanner in their app
+- They scan the QR code on the customer's phone screen
+- This only works if both phones are physically close to each other
+- The code expires in 60 seconds and cannot be reused
+
+This proves the driver was physically present. There is no number to read out over a phone — the driver must be standing next to the customer to scan their screen. This is why we replaced OTP with a scanner. OTP can be tricked over a phone call. A QR scan cannot.
+
+The scan alone does **not** complete the delivery. It starts a 10-minute window for Step 2.
+
+---
+
+**Step 2 — Customer uploads a photo of the received package**
+
+After receiving the package, the customer opens the app and takes a live photo of it.
+
+- The photo must be taken in the moment — uploading old photos from the camera roll is blocked
+- It is automatically tagged with the time and the customer's location
+- The customer's location when taking the photo must match the delivery address
+- Only after this photo is submitted does the delivery get marked complete
+
+The driver has zero control over this step. If they never handed over the package, the customer has nothing to photograph.
+
+---
+
+**Closing the scan-and-run hole**
+
+A driver could try: arrive → scan the QR code → tell the customer "we'll be back in 10 minutes" → leave.
+
+This fails because the scan only opens a 10-minute window. If the customer doesn't upload a photo within that window, the delivery stays incomplete and the payout is held. The driver cannot close the delivery themselves — only the customer's photo does that.
+
+```
+Driver scans QR code
+        ↓
+10-minute window opens
+        ↓
+Customer uploads receipt photo
+        ↓
+Delivery confirmed → Payout approved
+
+No photo within 10 minutes → Delivery not confirmed → Payout held
+```
+
+---
+
+**What if the customer genuinely forgets to upload?**
+
+This happens. A real delivery occurs, the customer receives their package, and they close the app and forget. We handle this with a simple fallback:
+
+- **2 minutes after scan** — customer gets a reminder notification
+- **5 minutes after scan** — second reminder with a one-tap "Yes, I received it" button — no photo needed
+- **10 minutes after scan, no response, driver has clean history** — delivery is auto-approved
+- **10 minutes after scan, no response, driver is new or flagged** — held for manual review
+
+| Situation | What happens |
 |---|---|
-| More than 90 seconds | Looks normal, approved |
-| 30 to 90 seconds | Customer photo proof required |
-| Less than 30 seconds | Flagged for review |
-
-A driver who arrived and left in 20 seconds did not have a real interaction, regardless of what other checks say.
-
----
-
-**Supporting checks:**
-
-**Customer complaint history**
-If a customer reports a non-delivery, it is logged against that driver. One complaint is a soft flag. Three complaints in 30 days trigger an automatic account review. This catches drivers who game deliveries one at a time over a longer period.
-
-**Customer confirmation notification**
-After a delivery is marked complete, the customer receives a push notification asking if their order arrived. If they report no within 10 minutes, the case is escalated automatically.
+| Customer uploads receipt photo | ✅ Confirmed immediately |
+| Customer taps "Yes, I received it" | ✅ Confirmed |
+| No response + driver has clean history | ✅ Auto-approved after 10 minutes |
+| No response + driver is new or flagged | 🔄 Held for manual review |
+| Customer reports not received | 🚫 Escalated immediately |
 
 ---
 
-### The scoring system
+### Why even a perfect GPS spoof doesn't work
 
-Every check above adds or subtracts points from a fraud risk score:
+Even if a driver perfectly fakes their GPS, IP address, and movement — they still cannot complete the delivery without:
 
-| What we found | Points added |
+1. **Physically scanning the QR code** on the customer's phone — requires being next to the customer in person
+2. **The customer uploading a receipt photo** — the driver has no control over this at all
+
+| What the fraudster tries | Can they fake it? |
+|---|---|
+| Spoof GPS to look like they're at the address | ✅ Possible |
+| Fake IP address and WiFi signals | ⚠️ Very difficult |
+| Fake phone movement | ⚠️ Very difficult |
+| Complete the QR scan without being there | ❌ Impossible |
+| Get the customer to upload a receipt photo without receiving anything | ❌ Impossible |
+
+Location fraud gets them past the first set of checks. It gets them nowhere near completing the delivery.
+
+---
+
+### The risk score
+
+Every check adds or subtracts points from a fraud risk score for that delivery:
+
+| What we found | Points |
 |---|---|
 | GPS and IP location don't match | +30 |
 | Phone shows no real movement | +25 |
 | Behavior looks unusual for this account | +20 |
-| Account is connected to a known fraud group | +35 |
+| Account connected to a known fraud group | +35 |
 | Tampered or fake device detected | +25 |
-| QR scan was not completed | +40 |
-| Driver left address in under 30 seconds | +20 |
-| Customer did not upload receipt photo | +30 |
+| QR scan not completed | +40 |
+| Driver left the address in under 30 seconds | +20 |
+| Customer receipt photo not uploaded | +30 |
 | Customer reported non-delivery | +25 |
 | Driver has a strong, clean history | −20 |
 
 | Final score | Decision |
 |---|---|
 | 0 – 30 | Payout approved automatically |
-| 31 – 64 | Payout held — driver asked to resolve the missing check |
-| 65 – 84 | Sent to a human reviewer |
-| 85 and above | Payout blocked, account flagged |
+| 31 – 79 | Payout held — driver asked to resolve the missing step |
+| 80 – 139 | Sent to a human reviewer |
+| 140 and above | Payout blocked, account flagged |
 
----
-
-### Why this combination is hard to fake
-
-| Attack | Why it fails |
-|---|---|
-| Driver calls customer and asks for OTP | There is no OTP. QR scan requires physical presence |
-| Driver takes their own photo and submits it | Photo must come from the customer's device, at customer's location |
-| Driver uploads a fake or old photo | Camera roll blocked, photo is live-tagged with time and GPS |
-| Driver stands nearby but doesn't knock | Dwell time check catches < 30 second stays |
-| Driver colludes with customer | Customer complaint history and repeat pattern detection catches this over time |
+A single signal firing never hard-blocks anyone. Multiple signals firing together escalate the decision step by step. Only when most signals fire at once — meaning deliberate, coordinated fraud — does the payout get blocked outright.
 
 ---
 
 ### Protecting honest workers
 
-- Drivers with a long, clean history get a 20-point buffer — minor signal issues don't penalize them
-- A blocked payout is never an instant ban — it generates a case ID the driver can appeal
-- Medium-risk deliveries give the driver a chance to resolve the missing check before anything is blocked
-- Human reviewers handle every borderline case
+- Drivers with a long clean history get a 20-point buffer — small issues don't penalize them
+- A blocked payout is never an instant ban — every block gets a case ID the driver can appeal
+- The fallback ladder means genuine deliveries never get permanently stuck because a customer forgot to respond
+- Human reviewers handle every borderline case — the system never makes a final call alone when things are unclear
 
 ---
 
 ## How we built it
 
-- **FastAPI (Python)** — handles every incoming delivery event and runs the checks in order
-- **Scikit-learn** — runs behavioral anomaly detection (Isolation Forest)
-- **PyTorch** — pattern-matching model trained on legitimate delivery sessions
-- **PyTorch Geometric** — fraud group detection across the account-device-IP graph
-- **Neo4j** — stores connections between accounts, phones, and IP addresses as a graph
-- **Apache Kafka** — streams live device events (location, sensor data) in real time
-- **Redis** — caches risk scores so checks on the same account are instant
+- **FastAPI** — receives every delivery event and runs all checks in order
+- **Scikit-learn** — spots unusual behavior patterns per account over time
+- **PyTorch** — learns what normal delivery sessions look like and flags sessions that deviate
+- **PyTorch Geometric** — finds connected fraud groups across accounts, devices, and IP addresses
+- **Neo4j** — stores the connections between accounts, phones, and IPs as a graph so fraud rings are easy to spot
+- **Apache Kafka** — streams live location and sensor data from devices in real time
+- **Redis** — saves risk scores so repeated checks on the same account are instant
 - **PostgreSQL** — stores all delivery records and audit logs
-- **React + Grafana** — live dashboard showing flagged deliveries and fraud hotspots on a map
+- **React + Grafana** — live dashboard for platform operators showing flagged deliveries and suspicious areas on a map
 
 ---
 
 ## Challenges we ran into
 
-**OTP is the industry standard — but it's broken.** The social engineering attack (calling the customer and asking for the code) is simple, requires no technical skill, and works on trusting customers every time. Replacing OTP with a QR scanner meant redesigning how both the driver app and customer app interact at the moment of delivery.
+**OTP is the industry standard — and it is broken.** The social engineering attack requires no technical skill at all: call the customer, ask for the code, done. Replacing it with a QR scanner that requires physical proximity meant rethinking how the driver and customer apps interact at the exact moment of handoff.
 
-**Making the customer photo upload frictionless.** Asking the customer to take a photo and upload it adds a step most people will skip if it's annoying. We made it a single tap from the delivery notification — the camera opens automatically, the photo uploads in one step, and the customer sees their order confirmed instantly.
+**The scan-and-run problem.** Once we added the QR scanner, we immediately realized a driver could scan and leave. Making the scan open a window that only the customer's photo can close — and linking the two steps explicitly — is what makes the combination work.
 
-**Making everything fast enough.** Each check takes a different amount of time. We run fast checks first and only trigger the heavier ones when early checks raise a flag — so clean deliveries get approved in milliseconds.
+**Customers forgetting to confirm.** A strict "photo required or payout blocked" rule would hold back thousands of legitimate payouts every day. Building the fallback ladder — reminders, one-tap button, and auto-approval for trusted drivers — took the most iteration to get right.
 
-**No real fraud data to train on.** We trained the AI models on normal, legitimate behavior and flag anything that looks significantly different. Getting the threshold right without penalizing too many genuine drivers took a lot of testing.
+**Speed.** Checking fraud groups across a large graph of connected accounts takes time. We run the fast checks first and only trigger the heavier checks when something early looks suspicious — so clean deliveries get approved in milliseconds.
 
 ---
 
 ## Accomplishments that we're proud of
 
-- **Identified and closed the OTP social engineering hole** — replaced it with a QR scanner that requires physical presence, which cannot be faked over a phone call
-- **Flipped photo proof to the customer side** — the customer uploads the receipt photo, not the driver, making it impossible for the driver to fake
-- **Solved both fraud types** — fake location attacks and ghost deliveries — in one connected system
-- **Fraud groups get caught** even when individual accounts look clean, by tracing shared devices and IP addresses
-- **Honest workers are protected** through reputation buffers and a human review step for every borderline case
-- Built and connected the full pipeline in under 24 hours as a team of four
+- Found and closed the OTP social engineering hole — replaced with a QR scanner that requires physical presence
+- Found and closed the scan-and-run hole — the scan alone never completes a delivery, only the customer's photo does
+- Built a fallback system so genuine deliveries are never permanently blocked because a customer forgot to tap confirm
+- GPS spoofing is stopped not by detecting the spoof itself but by requiring real customer interaction to complete the delivery
+- Fraud groups are caught by connecting the dots between accounts, phones, and IP addresses — even before any individual account does something wrong
+- Built the entire system end to end in under 24 hours as a team of four
 
 ---
 
 ## What we learned
 
-**The most obvious fix is often the most exploitable one.** OTP verification sounds secure. In practice, a 30-second phone call defeats it. The better question is always: what does this check require that cannot be done remotely or over a phone?
+**Every fix creates a new attack surface.** OTP fixed ghost delivery fraud until we saw it could be read out over a phone. The QR scanner fixed that until we saw a driver could scan and leave. Thinking through the next attack after every fix is what separates a real fraud system from a checklist.
 
-**Flipping who provides the proof changes everything.** When the driver submits proof, the driver can fake it. When the customer submits proof — on their own device, at their own location, in real time — there is nothing for the driver to fake.
+**The two confirmation steps only work because they are linked.** If the scan and the photo were independent, either one could be gamed on its own. Tying them together — scan opens the window, photo closes it — is what makes the combination hard to beat.
 
-**Connecting accounts, devices, and IPs as a graph changes everything.** In a regular database, ten fraud accounts look like ten separate normal accounts. In a graph, they immediately cluster together and expose themselves.
+**Flipping who provides proof changes everything.** When the driver submits proof, the driver controls it. When the customer submits proof from their own phone at their own location, the driver has nothing to fake.
 
-**Protecting real workers is not a nice-to-have — it shapes every technical decision.** Every time we made a check stricter, we asked: what happens to a real driver with a bad GPS signal, a customer who didn't open the app, or a slow internet connection? That question changed how we calibrated every threshold.
+**Protecting honest workers shapes every decision.** Every time we tightened a check, we asked: what happens to a real driver whose customer forgot to open the app? That question drove the entire fallback design.
 
 ---
 
 ## What's next for FraudShield
 
-- **Automatic customer photo review** — use a vision model to check receipt photos for fakes (recycled images, wrong items, AI-generated) instead of manual review
-- **User-side fraud detection** — catching customers who falsely report non-delivery to get a refund while keeping the product
-- **Shared fraud intelligence** — let platforms share anonymized fraud patterns so a fraud ring caught on one platform can't just move to another
-- **Full audit trail for compliance** — exportable records of every fraud decision to meet data protection requirements in India (DPDP) and Europe (GDPR)
-- **Simulation mode for operators** — let platform teams replay past fraud attacks against the current system to test whether new changes would have caught them
+- **Automatic photo checking** — use a vision model to catch fake receipt photos such as recycled images or photos taken at the wrong location, instead of relying on manual review
+- **Catching user-side fraud** — customers who falsely report non-delivery to get a refund while keeping the product, detected by cross-checking their complaint history against driver scan and photo data
+- **Shared fraud signals across platforms** — a fraud ring caught on one platform should not be able to simply move to another
+- **Compliance audit trail** — a full exportable record of every fraud decision to meet data protection laws in India and Europe
+- **Operator replay mode** — let platform teams test whether their current system would have caught past fraud attacks, before pushing any changes live
