@@ -6,7 +6,7 @@ The gig economy runs on trust. Millions of delivery partners and on-demand worke
 
 While building FraudShield, we uncovered a striking reality: **GPS coordinates can be faked in under 30 seconds using free apps**, and most payout systems have zero defense against it. A coordinated fraud ring — even a small one — can drain a platform of thousands of dollars per day by simulating fake stranded deliveries, all while appearing completely legitimate to a GPS-only verification system.
 
-That hit us hard. The workers who *are* genuinely stranded get caught in blanket crackdowns. The actual fraudsters keep exploiting the system. Nobody wins except the attackers.
+That hit us hard. The workers who are genuinely stranded get caught in blanket crackdowns. The actual fraudsters keep exploiting the system. Nobody wins except the attackers.
 
 We asked ourselves: what if you could build a system that was *smarter* than the attacker — one that doesn't just check coordinates, but reconstructs the full physical truth of whether someone was really where they claimed to be?
 
