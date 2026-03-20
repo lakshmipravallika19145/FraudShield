@@ -70,7 +70,7 @@ We check how long the driver stayed within 50 meters of the delivery address. A 
 | Less than 30 seconds | Flagged for review |
 
 **Photo of the delivery**
-The driver must take a photo of the package at the door before completing the delivery. The photo must be taken live in the moment — not uploaded from the camera roll. It gets tagged with the time and GPS location automatically. If the same photo gets reused across multiple deliveries, the system catches it.
+The driver must take a photo of the package at the door before completing the delivery. The photo must be taken live in the moment (Geo tagged photo)— not uploaded from the camera roll. It gets tagged with the time and GPS location automatically. If the same photo gets reused across multiple deliveries, the system catches it.
 
 **Customer confirmation**
 After the driver marks delivery complete, the customer gets a notification asking if their order arrived. If they say no within 10 minutes, the case is automatically escalated. If they don't respond, it's treated as a soft approval after the window closes.
