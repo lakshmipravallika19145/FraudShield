@@ -38,7 +38,7 @@ Fake GPS apps move in perfectly straight lines at perfectly constant speeds. Rea
 **Is the device legitimate?**
 We check if the phone is running a fake GPS app, is a virtual device pretending to be a real phone, or has been tampered with to bypass security. These are the tools fraudsters need — detecting them early raises a warning before anything else happens.
 
-That's it. Three checks. Simple, fast, and effective for catching drivers who never left home.
+Three checks. Simple, fast, and effective for catching drivers who never left home.
 
 ---
 
@@ -54,8 +54,8 @@ We solved this with a two-step confirmation that **both the driver and the custo
 
 Every delivery has a unique QR code that lives inside the customer's app. When the driver arrives:
 
-- The driver opens the scanner in their app
-- They scan the QR code on the customer's phone screen
+- The driver opens the scanner in their delivery app
+- They scan the QR code shown on the customer's phone screen
 - This only works if both phones are physically close to each other
 - The code expires in 60 seconds and cannot be reused
 
@@ -105,15 +105,15 @@ This happens. A real delivery occurs, the customer receives their package, and t
 - **2 minutes after scan** — customer gets a reminder notification
 - **5 minutes after scan** — second reminder with a one-tap "Yes, I received it" button — no photo needed
 - **10 minutes after scan, no response, driver has clean history** — delivery is auto-approved
-- **10 minutes after scan, no response, driver is new or flagged** — held for manual review
+- **10 minutes after scan, no response, driver is new or has past complaints** — held for manual review
 
 | Situation | What happens |
 |---|---|
-| Customer uploads receipt photo | Confirmed immediately |
-| Customer taps "Yes, I received it" | Confirmed |
-| No response + driver has clean history | Auto-approved after 10 minutes |
-| No response + driver is new or flagged | Held for manual review |
-| Customer reports not received | Escalated immediately |
+| Customer uploads receipt photo |  Confirmed immediately |
+| Customer taps "Yes, I received it" |  Confirmed |
+| No response + driver has clean history |  Auto-approved after 10 minutes |
+| No response + driver is new or flagged |  Held for manual review |
+| Customer reports not received |  Escalated immediately |
 
 ---
 
@@ -126,30 +126,22 @@ Even if a driver perfectly fakes their GPS, IP address, and movement — they st
 
 | What the fraudster tries | Can they fake it? |
 |---|---|
-| Spoof GPS to look like they're at the address | Possible |
+| Spoof GPS to look like they're at the address |  Possible |
 | Fake IP address and WiFi signals |  Very difficult |
 | Fake phone movement |  Very difficult |
-| Complete the QR scan without being there | Impossible |
-| Get the customer to upload a receipt photo without receiving anything | Impossible |
+| Complete the QR scan without being there |  Impossible |
+| Get the customer to upload a receipt photo without receiving anything |  Impossible |
 
 Location fraud gets them past the first set of checks. It gets them nowhere near completing the delivery.
 
 ---
 
-### The risk score
-
-Every check adds or subtracts points from a fraud risk score for that delivery:
-
-A single signal firing never hard-blocks anyone. Multiple signals firing together escalate the decision step by step. Only when most signals fire at once — meaning deliberate, coordinated fraud — does the payout get blocked outright.
-
----
-
 ### Protecting honest workers
 
-- Drivers with a long clean history get a 20-point buffer — small issues don't penalize them
+- Drivers with a long clean history get automatic approval when customers don't respond — small issues don't penalize good drivers
 - A blocked payout is never an instant ban — every block gets a case ID the driver can appeal
 - The fallback ladder means genuine deliveries never get permanently stuck because a customer forgot to respond
-- Human reviewers handle every borderline case — the system never makes a final call alone when things are unclear
+- Human reviewers handle every unclear case — the system never makes a final call alone on uncertain situations
 
 ---
 
@@ -159,9 +151,9 @@ A single signal firing never hard-blocks anyone. Multiple signals firing togethe
 - **Scikit-learn** — spots unusual behavior patterns per account over time
 - **PyTorch** — learns what normal delivery sessions look like and flags sessions that deviate
 - **PyTorch Geometric** — finds connected fraud groups across accounts, devices, and IP addresses
-- **Neo4j** — stores the connections between accounts, phones, and IPs as a graph so fraud rings are easy to spot
+- **Neo4j** — stores connections between accounts, phones, and IPs as a graph so fraud rings are easy to spot
 - **Apache Kafka** — streams live location and sensor data from devices in real time
-- **Redis** — saves risk scores so repeated checks on the same account are instant
+- **Redis** — saves check results so repeated lookups on the same account are instant
 - **PostgreSQL** — stores all delivery records and audit logs
 - **React + Grafana** — live dashboard for platform operators showing flagged deliveries and suspicious areas on a map
 
