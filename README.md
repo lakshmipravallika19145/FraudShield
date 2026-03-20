@@ -26,7 +26,7 @@ Fake GPS apps produce geometrically perfect but physically impossible trajectori
 
 $$MAS = \alpha \cdot S_{physics} + \beta \cdot S_{sensor} + \gamma \cdot S_{entropy}$$
 
-where \\( \alpha, \beta, \gamma \\) are learned weights and each sub-score penalizes specific spoofing signatures. A real moving vehicle vibrates. A fake one doesn't.
+where ( \alpha, \beta, \gamma \\) are learned weights and each sub-score penalizes specific spoofing signatures. A real moving vehicle vibrates. A fake one doesn't.
 
 **Layer 3 — AI Anomaly Detection**
 Two unsupervised models run in parallel on an 8-dimensional behavioral feature vector:
@@ -46,10 +46,10 @@ Every signal feeds into a single weighted fraud score:
 
 | Score | Decision |
 |---|---|
-| 0 – 30 | ✅ Approve automatically |
-| 31 – 64 | 🔄 Hold — request photo/video proof |
-| 65 – 84 | ⚠️ Escalate to senior review |
-| 85+ | 🚫 Block payout, log to fraud graph |
+| 0 – 30 | Approve automatically |
+| 31 – 64 | Hold — request photo/video proof |
+| 65 – 84 | Escalate to senior review |
+| 85+ | Block payout, log to fraud graph |
 
 **Layer 7 — Genuine Worker Protection**
 Workers with strong reputation histories get a score buffer. Every blocked payout generates an appeal case ID. No instant bans — only evidence-based escalation.
